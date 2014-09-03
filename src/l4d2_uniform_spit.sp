@@ -9,12 +9,14 @@
 new Handle:hCvarDamagePerTick;
 new Handle:hCvarMaxTicks;
 new Handle:hCvarGodframeTicks;
+new Handle:hCvarInterpolationFactor;
 new Handle:hPuddles;
 
 new Float:damagePerTick;
 
 new maxTicks;
 new godframeTicks;
+new spitInterpolationFactor;
 
 new bool:bLateLoad;
 
@@ -38,6 +40,7 @@ public OnPluginStart()
 	hCvarDamagePerTick = CreateConVar("l4d2_spit_dmg", "-1.0", "Damage per tick the spit inflicts. -1 to skip damage adjustments");
 	hCvarMaxTicks = CreateConVar("l4d2_spit_max_ticks", "28", "Maximum number of acid damage ticks");
 	hCvarGodframeTicks = CreateConVar("l4d2_spit_godframe_ticks", "4", "Number of initial godframed acid ticks");
+	hCvarInterpolationFactor = CreateConVar("l4d2_spit_interpolation_factor", "0", "Interpolate this much extra damage above the normal spit damage based on tick count.");
 
 	hPuddles = CreateTrie();
 
@@ -58,6 +61,7 @@ public OnConfigsExecuted()
 	damagePerTick = GetConVarFloat(hCvarDamagePerTick);
 	maxTicks = GetConVarInt(hCvarMaxTicks);
 	godframeTicks = GetConVarInt(hCvarGodframeTicks);
+	spitInterpolationFactor = GetConVarInt(hCvarInterpolationFactor);
 }
 
 public OnClientPutInServer(client)
@@ -126,6 +130,17 @@ public Action:OnTakeDamage(victim, &attacker, &inflictor, &Float:damage, &damage
 			if (damagePerTick > -1.0)
 			{
 				damage = damagePerTick;
+				
+				if(spitInterpolationFactor > 1)
+				{
+					// e.g.
+					// spitInterpolationFactor = 2
+					// This will do an extra 1 damage every other frame.
+					// spitInterpolationFactor = 3
+					// This will alternate between doing 0, 1, and 2 extra damage based on tick count.
+					
+					damage += count[victim] % spitInterpolationFactor;
+				}
 			}
 			if (godframeTicks >= count[victim] || count[victim] > maxTicks)
 			{
