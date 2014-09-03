@@ -131,12 +131,12 @@ public Action:OnTakeDamage(victim, &attacker, &inflictor, &Float:damage, &damage
 			{
 				damage = damagePerTick;
 				
-				if(spitInterpolationFactor > 0)
+				if(spitInterpolationFactor > 1)
 				{
 					// e.g.
-					// spitInterpolationFactor = 1
-					// This will do an extra 1 damage every other frame.
 					// spitInterpolationFactor = 2
+					// This will do an extra 1 damage every other frame.
+					// spitInterpolationFactor = 3
 					// This will alternate between doing 0, 1, and 2 extra damage based on tick count.
 					
 					damage += count[victim] % spitInterpolationFactor;
